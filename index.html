@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Socket.IO Chat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { height: 100%; }
+        body { font: 13px Helvetica, Arial; height: 100%; }
+        form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; display: none;}
+        form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+        form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 5px 10px; }
+        #messages li:nth-child(odd) { background: #eee; }
+        .modal { position: relative; height: 100%; width: 100%; background-color: #000; opacity: 0.8; }
+        .dialog { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            color: black; background-color: #aaa; opacity: 1; height: 10rem; width: 15rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <div id="usermodal" class="modal">
+        <div class="dialog">
+            <div>Enter name you want to use:</div>
+            <div class="input">
+                <input type="text" id="username"/>
+                <button id="name-submit">Submit</button>
+            </div>
+        </div>
+    </div>
+    <div id="nspmodal" class="modal">
+        <div class="dialog">
+            <div>Enter chat room name:</div>
+            <div class="input">
+                <input type="text" id="chatname"/>
+                <button id="chatname-submit">Submit</button>
+            </div>
+        </div>
+    </div>
+    <ul id="messages"></ul>
+    <form action="" id="chat-box">
+        <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.4.3.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+    <script>
+        var socket = io();
+        $('#usermodal').hide();
+
+        $('#chatname-submit').click(function(){
+           var chatName = $('#chatname').val();
+            console.log(chatName);
+            socket.emit('chatroom', chatName);
+            $('#nspmodal').hide();
+            $('#usermodal').show();
+        });
+        $('#name-submit').click(function(){
+            var userName = $('#username').val();
+            console.log(userName);
+            socket.emit('user name', userName);
+            $('#usermodal').hide();
+            $('#chat-box').show()
+        });
+
+        $('form').submit(function(){
+            socket.emit('chat message', $('#m').val());
+            $('#m').val('');
+            return false;
+        });
+        socket.on('chat message', function(msg){
+            console.log('receive', msg);
+            if('string' === typeof msg) {
+                $('#messages').append($('<li>').text(msg));
+            }else{
+                msg.forEach(function(text){
+                    $('#messages').append($('<li>').text(text));
+                });
+            }
+        });
+    </script>
+</body>
+</html>
