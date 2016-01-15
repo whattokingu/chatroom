@@ -7,7 +7,7 @@ var chatLog = {};
 var users = {};
 var room = {};
 app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
+  res.status(200).sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', function(socket){
@@ -18,6 +18,7 @@ io.on('connection', function(socket){
 
   socket.on('user name', function(name){
     users[socket.id] = name; //bind username to id
+    io.to(room[socket.id]).emit('chat message', 'welcome to ' + room[socket.id] + ', '+ name + '!');
   });
   socket.on('chatroom', function(chatroom){
     socket.join(chatroom);
